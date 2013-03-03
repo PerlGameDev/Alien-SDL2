@@ -202,28 +202,7 @@ sub extract_sources {
       print "Extracting $pack->{pack}...\n";
       my $ae = Archive::Extract->new( archive => $archive );
       die "###ERROR###: cannot extract $pack ", $ae->error unless $ae->extract(to => $build_src);
-      foreach my $i (@{$pack->{patches}}) {
-        chdir $srcdir;
-        my $patch_file = File::Spec->abs2rel( catfile($patches, $i), $srcdir );
-        print "Applying patch '$i'\n";
-        foreach my $k ($self->patch_get_affected_files($patch_file)) {
-          # doing the same like -p1 for 'patch'
-          $k =~ s/^[^\/]*\/(.*)$/$1/;
-          open(SRC, $k) or die "###ERROR### Cannot open file: '$k'\n";
-          my @src = <SRC>;
-          close(SRC);
-          open(DIFF, $patch_file) or die "###ERROR### Cannot open file: '$patch_file'\n";
-          my @diff = <DIFF>;
-          close(DIFF);
-          foreach(@src)  { $_=~ s/[\r\n]+$//; }
-          foreach(@diff) { $_=~ s/[\r\n]+$//; }
-          my $out = Text::Patch::patch( join("\n", @src) . "\n", join("\n", @diff) . "\n", { STYLE => "Unified" } );
-          open(OUT, ">$k") or die "###ERROR### Cannot open file for writing: '$k'\n";
-          print(OUT $out);
-          close(OUT);
-        }
-        chdir $self->base_dir();
-      }
+      $self->apply_patch($srcdir, $_) for (@{$pack->{patches}});
     }
   }
   return 1;
@@ -410,12 +389,43 @@ sub check_sha1sum {
   return ($_sha1sum eq $sha1sum) ? 1 : 0
 }
 
-sub patch_get_affected_files {
-  my( $self, $patch_file ) = @_;
+# pure perl implementation of patch functionality
+sub apply_patch {
+  my ($self, $dir_to_be_patched, $patch_file) = @_;
+  my ($src, $diff);
+
+  undef local $/;
   open(DAT, $patch_file) or die "###ERROR### Cannot open file: '$patch_file'\n";
-  my @affected_files = map{$_ =~ /^---\s*([\S]+)/} <DAT>;
+  $diff = <DAT>;
   close(DAT);
-  return @affected_files;
+  $diff =~ s/\r\n/\n/g; #normalise newlines
+  $diff =~ s/\ndiff /\nSpLiTmArKeRdiff /g;
+  my @patches = split('SpLiTmArKeR', $diff);
+
+  print STDERR "Applying patch file: '$patch_file'\n";
+  foreach my $p (@patches) {
+    my ($k) = map{$_ =~ /\n---\s*([\S]+)/} $p;
+    # doing the same like -p1 for 'patch'
+    $k =~ s|\\|/|g;
+    $k =~ s|^[^/]*/(.*)$|$1|;
+    $k = catfile($dir_to_be_patched, $k);
+    print STDERR "- gonna patch '$k'\n" if $self->notes('build_debug_info');
+
+    open(SRC, $k) or die "###ERROR### Cannot open file: '$k'\n";
+    $src  = <SRC>;
+    close(SRC);
+    $src =~ s/\r\n/\n/g; #normalise newlines
+
+    my $out = eval { Text::Patch::patch( $src, $p, { STYLE => "Unified" } ) };
+    if ($out) {
+      open(OUT, ">", $k) or die "###ERROR### Cannot open file for writing: '$k'\n";
+      print(OUT $out);
+      close(OUT);
+    }
+    else {
+      warn "###WARN### Patching '$k' failed: $@";
+    }
+  }
 }
 
 1;

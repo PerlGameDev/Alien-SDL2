@@ -176,7 +176,7 @@ our $source_packs = [
       },
       {
         pack => 'SDL2_ttf',
-        version => '2.0.12',
+        version => '2.0.12HG',
         dirname => 'SDL2_ttf-hg20130301',
         url => [
           'http://strawberryperl.com/package/kmx/sdl/src/SDL2_ttf-hg20130301.tar.gz',
@@ -187,7 +187,7 @@ our $source_packs = [
       },
       {
         pack => 'SDL2_gfx',
-        version => 'svn20130301',
+        version => '20130301-hg',
         dirname => 'SDL2_gfx-svn20130301',
         url => [
           'http://strawberryperl.com/package/kmx/sdl/src/SDL2_gfx-svn20130301.tar.gz',
@@ -198,7 +198,7 @@ our $source_packs = [
       },
       {
         pack => 'smpeg',
-        version => 'svn20130301',
+        version => '20130301-svn',
         dirname => 'libsmpeg-svn20130301',
         url => [
           'http://strawberryperl.com/package/kmx/sdl/src/libsmpeg-svn20130301.tar.gz',
