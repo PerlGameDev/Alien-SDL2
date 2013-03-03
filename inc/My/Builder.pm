@@ -404,14 +404,14 @@ sub apply_patch {
 
   print STDERR "Applying patch file: '$patch_file'\n";
   foreach my $p (@patches) {
-    my ($k) = map{$_ =~ /\n---\s*([\S]+)/} $p;
+    my ($k) = $p =~ /^---\s*([\S]+)/;
     # doing the same like -p1 for 'patch'
     $k =~ s|\\|/|g;
     $k =~ s|^[^/]*/(.*)$|$1|;
     $k = catfile($dir_to_be_patched, $k);
-    print STDERR "- gonna patch '$k'\n" if $self->notes('build_debug_info');
+    print STDERR "- gonna patch '$k'\n";
 
-    open(SRC, $k) or die "###ERROR### Cannot open file: '$k'\n";
+    open(SRC, "<", $k) or die "###ERROR### Cannot open file: '$k'\n";
     $src  = <SRC>;
     close(SRC);
     $src =~ s/\r\n/\n/g; #normalise newlines
