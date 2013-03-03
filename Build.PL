@@ -86,6 +86,7 @@ my $build = $package->new(
     'Text::Patch'      => '1.4',
     'File::ShareDir'   => '0',
     'Capture::Tiny'    => '0',
+    'IPC::Run3'        => '0',
   },
   meta_merge => {
     resources  => {

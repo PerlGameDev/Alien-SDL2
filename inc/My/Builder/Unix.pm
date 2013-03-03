@@ -9,11 +9,6 @@ use My::Utility qw(check_header check_prereqs_libs check_prereqs_tools $inc_lib_
 use Config;
 use Capture::Tiny;
 
-# $Config{cc} tells us to use gcc-4, but it is not there by default
-if($^O eq 'cygwin') {
-  $My::Utility::cc = 'gcc';
-}
-
 sub get_additional_cflags {
   my $self = shift;
   my @list = ();
@@ -48,6 +43,11 @@ sub can_build_binaries_from_sources {
 sub build_binaries {
   my( $self, $build_out, $build_src ) = @_;
   my $bp = $self->notes('build_params');
+  my $make = $self->_get_make;
+
+  my $m = $self->prompt("\nDo you want to see all messages during configure/make (y/n)?", 'n');
+  $self->notes('build_msgs', lc($m) eq 'y' ? 1 : 0);
+
   foreach my $pack (@{$bp->{members}}) {
     if($pack->{pack} =~ m/^tiff|png|ogg|vorbis|z$/ && check_prereqs_libs($pack->{pack})->[0]) {
       print "SKIPPING package '" . $pack->{dirname} . "' (already installed)...\n";
@@ -88,7 +88,7 @@ sub build_binaries {
       }
 
       # do 'make install'
-      my @cmd = ($self->_get_make, 'install');
+      my @cmd = ($make, 'install');
       print "Running make install $pack->{pack}...\n";
       $self->run_custom(\@cmd) or die "###ERROR### [$?] during make ... ";
 
@@ -106,14 +106,7 @@ sub _get_configure_cmd {
   my $escaped_prefixdir         = $self->escape_path( $prefixdir );
   my $extra_cflags              = "-I$escaped_prefixdir/include " . $self->get_additional_cflags();
   my $extra_ldflags             = "-L$escaped_prefixdir/lib "     . $self->get_additional_libs();
-  my $extra_PATH                = "";
-  my $uname                     = $Config{archname};
-  my $stdout                    = '';
-  my $stderr                    = '';
   my $cmd;
-
-  ($stdout, $stderr) = Capture::Tiny::capture { print `uname -a`; };
-  $uname            .= " $stdout" if $stdout;
 
   # NOTE: all ugly IFs concerning ./configure params have to go here
 
