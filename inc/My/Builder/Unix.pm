@@ -37,7 +37,6 @@ sub get_additional_libs {
     }
   }
   push @list, (keys %rv);
-  push @list, '-lpthread' if ($^O eq 'openbsd');
   return join(' ', @list);
 }
 
@@ -50,17 +49,8 @@ sub build_binaries {
   my( $self, $build_out, $build_src ) = @_;
   my $bp = $self->notes('build_params');
   foreach my $pack (@{$bp->{members}}) {
-    if($pack->{pack} =~ m/^png|ogg|vorbis|z$/ && check_prereqs_libs($pack->{pack})->[0]) {
+    if($pack->{pack} =~ m/^tiff|png|ogg|vorbis|z$/ && check_prereqs_libs($pack->{pack})->[0]) {
       print "SKIPPING package '" . $pack->{dirname} . "' (already installed)...\n";
-    }
-    elsif($pack->{pack} =~ m/^(SDL_mixer)$/ && !$self->_is_gnu_make($self->_get_make)) {
-      print "SKIPPING package '" . $pack->{dirname} . "' (GNU Make needed)...\n";
-    }
-    elsif($pack->{pack} =~ m/^(SDL_Pango)$/ && !check_prereqs_tools('pkg-config')) {
-      print "SKIPPING package '" . $pack->{dirname} . "' (pkg-config needed)...\n";
-    }
-    elsif($pack->{pack} =~ m/^(SDL_ttf)$/ && $^O eq 'cygwin') {
-      print "SKIPPING package '" . $pack->{dirname} . "' (we cant use libfreetype)...\n";
     }
     else {
       print "BUILDING package '" . $pack->{dirname} . "'...\n";
@@ -69,11 +59,6 @@ sub build_binaries {
       $self->config_data('build_prefix', $prefixdir); # save it for future Alien::SDL::ConfigData
 
       chdir $srcdir;
-
-      if($pack->{pack} eq 'SDL' && $^O eq 'cygwin') {
-        $self->do_system('cp ../../patches/SDL-1.2.14-configure configure');
-        $self->do_system('cp ../../patches/SDL-1.2.14-ltmain_sh build-scripts/ltmain.sh');
-      }
 
       # setting environments PATH
       my $extra_PATH = "";
@@ -136,71 +121,13 @@ sub _get_configure_cmd {
 
   # NOTE: all ugly IFs concerning ./configure params have to go here
 
-  if($pack eq 'SDL_gfx' && $uname =~ /(powerpc|ppc|64|2level|alpha|armv[56]|sparc)/i) {
-    $extra .= ' --disable-mmx';
-  }
-
-  if($pack eq 'SDL' && $uname =~ /(powerpc|ppc)/) {
-    $extra .= ' --disable-video-ps3';
-  }
-
-  if($pack eq 'SDL' && $^O eq 'darwin' && !check_header($self->get_additional_cflags, 'X11/Xlib.h')) {
-    $extra .= ' --without-x';
-  }
-
-  if($pack eq 'SDL' && !check_header($self->get_additional_cflags, 'X11/extensions/XShm.h')) {
-    $extra        .= ' --disable-video-x11-xv';
-    $extra_cflags .= ' -DNO_SHARED_MEMORY';
-  }
-
-  if($pack =~ /^SDL_(image|mixer|ttf|gfx|Pango)$/ && $^O eq 'darwin') {
+  if($pack =~ /^SDL2_(image|mixer|ttf|gfx|net)$/) {
     $extra .= ' --disable-sdltest';
   }
 
-  if($pack eq 'SDL' && $^O eq 'solaris' && !check_header($extra_cflags, 'sys/audioio.h')) {
-    $extra .= ' --disable-audio';
-  }
-
-  if($pack eq 'SDL' && $^O eq 'openbsd') {
-    $extra_ldflags .= ' -lpthread';
-  }
-
-  if($pack =~ /^SDL_/) {
+  if($pack =~ /^SDL2_/) {
     $extra .= " --with-sdl-prefix=$escaped_prefixdir";
   }
-
-  if($^O eq 'cygwin') {
-    #$extra_cflags  .= " -I/lib/gcc/i686-pc-cygwin/3.4.4/include";
-    #$extra_ldflags .= " -L/lib/gcc/i686-pc-cygwin/3.4.4";
-#    $extra_cflags  .= " -I/usr/include";
-#    $extra_ldflags .= " -L/lib";
-#    $extra_cflags  .= " -I/lib/gcc/i686-pc-cygwin/4.3.4/include";
-#    $extra_ldflags .= " -L/lib/gcc/i686-pc-cygwin/4.3.4";
-
-    if($pack eq 'SDL') {
-      # kmx experienced troubles while cygwin build when nasm was present in PATH
-#      $extra .= " --disable-nasm --enable-pthreads --enable-pthread-sem --enable-sdl-dlopen --disable-arts"
-#              . " --disable-esd --disable-nas --enable-oss --disable-pulseaudio --disable-dga --disable-video-aalib"
-#              . " --disable-video-caca --disable-video-dga --enable-video-dummy --disable-video-ggi --enable-video-opengl"
-#              . " --enable-video-x11 --disable-video-x11-dgamouse --disable-video-x11-vm --enable-video-x11-xinerama"
-#              . " --disable-video-x11-xme --enable-video-x11-xrandr --disable-video-x11-xv --disable-arts-shared"
-#              . " --disable-esd-shared --disable-pulseaudio-shared --enable-x11-shared";
-    }
-  }
-
-  if($pack eq 'jpeg') {
-    # otherwise libtiff will complain about invalid version number on dragonflybsd
-    $extra .= " --disable-ld-version-script";
-  }
-
-  ### This was intended as a fix for http://www.cpantesters.org/cpan/report/7064012
-  ### Unfortunately does not work.
-  #
-  #if(($pack eq 'SDL') && ($^O eq 'darwin')) {
-  #  # fix for many MacOS CPAN tester reports saying "error: X11/Xlib.h: No such file or directory"
-  #  $extra_cflags .= ' -I/usr/X11R6/include';
-  #  $extra_ldflags .= ' -L/usr/X11R6/lib';
-  #}
 
   if($pack eq 'z') {
     # does not support params CFLAGS=...
@@ -209,10 +136,6 @@ sub _get_configure_cmd {
   else {
     $cmd = "./configure --prefix=$escaped_prefixdir --enable-static=yes --enable-shared=yes $extra" .
            " CFLAGS=\"$extra_cflags\" LDFLAGS=\"$extra_ldflags\"";
-  }
-
-  if($pack ne 'SDL' && $^O =~ /bsd$/) {
-    $cmd = "LD_LIBRARY_PATH=\"$escaped_prefixdir/lib:\$LD_LIBRARY_PATH\" $cmd";
   }
 
   if($pack eq 'vorbis') {
