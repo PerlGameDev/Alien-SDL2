@@ -227,6 +227,7 @@ sub check_config_script {
   }
   $version =~ s/[\r\n]+$//;
   $prefix  =~ s/[\r\n]+$//;
+  $prefix = rel2abs($prefix);
   print "yes, $script\n";
   #returning HASHREF
   return {
