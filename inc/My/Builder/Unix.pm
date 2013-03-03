@@ -7,7 +7,6 @@ use base 'My::Builder';
 use File::Spec::Functions qw(catdir catfile rel2abs);
 use My::Utility qw(check_header check_prereqs_libs check_prereqs_tools $inc_lib_candidates);
 use Config;
-use Capture::Tiny;
 
 sub get_additional_cflags {
   my $self = shift;
@@ -45,9 +44,6 @@ sub build_binaries {
   my $bp = $self->notes('build_params');
   my $make = $self->_get_make;
 
-  my $m = $self->prompt("\nDo you want to see all messages during configure/make (y/n)?", 'n');
-  $self->notes('build_msgs', lc($m) eq 'y' ? 1 : 0);
-
   foreach my $pack (@{$bp->{members}}) {
     if($pack->{pack} =~ m/^tiff|png|ogg|vorbis|z$/ && check_prereqs_libs($pack->{pack})->[0]) {
       print "SKIPPING package '" . $pack->{dirname} . "' (already installed)...\n";
@@ -76,7 +72,6 @@ sub build_binaries {
       $run_configure    = $self->prompt("Run ./configure for '$pack->{pack}' again?", "y") if (-f "config.status");
       if (lc($run_configure) eq 'y') {
         my $cmd = $self->_get_configure_cmd($pack->{pack}, $prefixdir);
-        print "Configuring package '$pack->{pack}'...\n";
         unless($self->run_custom($cmd)) {
           if(-f "config.log" && open(CONFIGLOG, "<config.log")) {
             print "config.log:\n";
@@ -89,7 +84,6 @@ sub build_binaries {
 
       # do 'make install'
       my @cmd = ($make, 'install');
-      print "Running make install $pack->{pack}...\n";
       $self->run_custom(\@cmd) or die "###ERROR### [$?] during make ... ";
 
       chdir $self->base_dir();

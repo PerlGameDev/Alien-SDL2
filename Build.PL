@@ -85,7 +85,6 @@ my $build = $package->new(
     'Module::Build'    => '0.36',
     'Text::Patch'      => '1.4',
     'File::ShareDir'   => '0',
-    'Capture::Tiny'    => '0',
     'IPC::Run3'        => '0',
   },
   meta_merge => {
