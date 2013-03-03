@@ -163,10 +163,6 @@ Returns string like '1.2.3' or undef if not able to find and parse version info.
     Thakore.Kartik@gmail.com
     http://yapgh.blogspot.com
 
-=head1 ACKNOWLEDGEMENTS
-
-    kmx - complete redesign between versions 0.7.x and 0.8.x
-
 =head1 COPYRIGHT
 
 This program is free software; you can redistribute
