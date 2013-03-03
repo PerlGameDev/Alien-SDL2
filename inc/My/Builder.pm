@@ -430,11 +430,12 @@ sub apply_patch {
 }
 
 sub run_output_on_error {
-  my ($self, $limit, @cmd) = @_;
+  my ($self, $limit, $cmd) = @_;
   my $output;
-  print STDERR "CMD: " . join(' ',@cmd) . "\n";
+  my $c = ref($cmd) eq 'ARRAY' ? join(' ',@$cmd) : $cmd;
+  print STDERR "CMD: $c\n";
   print STDERR "- running (stdout+stderr redirected)...\n";
-  my $rv = run3(\@cmd, \undef, \$output, \$output, { return_if_system_error => 1 } );
+  my $rv = run3($cmd, \undef, \$output, \$output, { return_if_system_error => 1 } );
   my $success = ($rv == 1 && $? == 0) ? 1 : 0;
   if ($success) {
     print STDERR "- finished successfully (output suppressed)\n";
@@ -453,12 +454,8 @@ sub run_output_on_error {
 
 sub run_output_std {
   my ($self, $cmd) = @_;
-  if (ref($cmd) eq 'ARRAY') {
-    print STDERR "CMD: " . join(' ',@$cmd) . "\n";
-  }
-  else {
-    print STDERR "CMD: $cmd\n";
-  }
+  my $c = ref($cmd) eq 'ARRAY' ? join(' ',@$cmd) : $cmd;
+  print STDERR "CMD: $c\n";
   my $rv = run3($cmd, undef, undef, undef, { return_if_system_error => 1 } );
   my $success = ($rv == 1 && $? == 0) ? 1 : 0;
   print STDERR "- finished successfully\n" if ($success);
@@ -474,7 +471,7 @@ sub run_custom {
   else {
     $rv = $self->run_output_on_error(undef, $cmd);
   }
-  warn "###WARN### error during run_custom()" unless $rv;
+  #warn "###WARN### error during run_custom()" unless $rv;
   return $rv;
 }
 
