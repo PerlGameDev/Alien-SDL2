@@ -16,6 +16,7 @@ use Archive::Extract;
 use Digest::SHA qw(sha1_hex);
 use Text::Patch;
 use Config;
+use IPC::Run3;
 
 $SIG{__WARN__} = sub {
 	my $thing =  join('', @_);
@@ -426,6 +427,63 @@ sub apply_patch {
       warn "###WARN### Patching '$k' failed: $@";
     }
   }
+}
+
+sub run_output_on_error {
+  my ($self, $limit, @cmd) = @_;
+  my $output;
+  print STDERR "CMD: " . join(' ',@cmd) . "\n";
+  print STDERR "- running (stdout+stderr redirected)...\n";
+  my $rv = run3(\@cmd, \undef, \$output, \$output, { return_if_system_error => 1 } );
+  my $success = ($rv == 1 && $? == 0) ? 1 : 0;
+  if ($success) {
+    print STDERR "- finished successfully (output suppressed)\n";
+  }
+  else {
+    $output = substr $output, -$limit if defined $limit; # we want just last N chars
+    if (!defined($limit)) {
+      print STDERR "OUTPUT:\n", $output, "\n";
+    }
+    elsif ($limit>0) {
+      print STDERR "OUTPUT: (only last $limit chars)\n", $output, "\n";
+    }
+  }
+  return $success;
+}
+
+sub run_output_std {
+  my ($self, $cmd) = @_;
+  if (ref($cmd) eq 'ARRAY') {
+    print STDERR "CMD: " . join(' ',@$cmd) . "\n";
+  }
+  else {
+    print STDERR "CMD: $cmd\n";
+  }
+  my $rv = run3($cmd, undef, undef, undef, { return_if_system_error => 1 } );
+  my $success = ($rv == 1 && $? == 0) ? 1 : 0;
+  print STDERR "- finished successfully\n" if ($success);
+  return $success;
+}
+
+sub run_custom {
+  my ($self, $cmd) = @_;
+  my $rv;
+  if ($self->notes('build_msgs')) {
+    $rv = $self->run_output_std($cmd);
+  }
+  else {
+    $rv = $self->run_output_on_error(undef, $cmd);
+  }
+  warn "###WARN### error during run_custom()" unless $rv;
+  return $rv;
+}
+
+sub run_stdout2str {
+  my ($self, $cmd) = @_;
+  my $output;
+  my $rv = run3($cmd, \undef, \$output, \undef, { return_if_system_error => 1 } );
+  $output =~ s/[\r\n]*$//;
+  return $output;
 }
 
 1;

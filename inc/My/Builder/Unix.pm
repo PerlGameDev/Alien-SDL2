@@ -77,8 +77,7 @@ sub build_binaries {
       if (lc($run_configure) eq 'y') {
         my $cmd = $self->_get_configure_cmd($pack->{pack}, $prefixdir);
         print "Configuring package '$pack->{pack}'...\n";
-        print "(cmd: $cmd)\n";
-        unless($self->do_system($cmd)) {
+        unless($self->run_custom($cmd)) {
           if(-f "config.log" && open(CONFIGLOG, "<config.log")) {
             print "config.log:\n";
             print while <CONFIGLOG>;
@@ -88,13 +87,10 @@ sub build_binaries {
         }
       }
 
-      $self->do_system('cp ../SDL-1.2/libtool libtool') if $pack->{pack} eq 'SDL_Pango';
-
       # do 'make install'
       my @cmd = ($self->_get_make, 'install');
       print "Running make install $pack->{pack}...\n";
-      print "(cmd: ".join(' ',@cmd).")\n";
-      $self->do_system(@cmd) or die "###ERROR### [$?] during make ... ";
+      $self->run_custom(\@cmd) or die "###ERROR### [$?] during make ... ";
 
       chdir $self->base_dir();
     }
