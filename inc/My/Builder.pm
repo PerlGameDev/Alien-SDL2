@@ -202,7 +202,7 @@ sub extract_sources {
       print "Extracting $pack->{pack}...\n";
       my $ae = Archive::Extract->new( archive => $archive );
       die "###ERROR###: cannot extract $pack ", $ae->error unless $ae->extract(to => $build_src);
-      $self->apply_patch($srcdir, $_) for (@{$pack->{patches}});
+      $self->apply_patch($srcdir, "$patches/$_") for (@{$pack->{patches}});
     }
   }
   return 1;
