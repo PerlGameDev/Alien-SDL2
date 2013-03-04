@@ -127,6 +127,18 @@ METHODS
     Returns string like '1.2.3' or undef if not able to find and parse
     version info.
 
+  havelib()
+    Checks the presence of given SDL2 related libraries.
+
+     Alien::SDL2->havelib('SDL2');
+     #or
+     Alien::SDL2->havelib('SDL2', 'SDL2_image', 'SDL2_mixer');
+
+    Parameter(s): One or more SDL2 related lib names - e.g. SDL2,
+    SDL2_mixer, SDL2_image, ...
+
+    Returns: 1 if all libs specified as a param are available; 0 otherwise.
+
 AUTHOR
         Kartik Thakore
         CPAN ID: KTHAKORE

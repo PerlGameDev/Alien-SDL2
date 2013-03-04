@@ -1,4 +1,4 @@
-# t/004_config.t
+# 004_get_header_version.t - test get_header_version() functionality
 
 use Test::More tests => 1;
 use Alien::SDL2;

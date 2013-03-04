@@ -23,6 +23,8 @@ Version 0.001
 our $VERSION = '0.001';
 $VERSION = eval $VERSION;
 
+my %HAVELIB_CACHE;
+
 =head1 SYNOPSIS
 
 Alien::SDL2 tries (in given order) during its installation:
@@ -156,6 +158,18 @@ based on "#define" macros inside this header file tries to get a version triplet
 
 Returns string like '1.2.3' or undef if not able to find and parse version info.
 
+=head2 havelib()
+
+Checks the presence of given SDL2 related libraries.
+
+ Alien::SDL2->havelib('SDL2');
+ #or
+ Alien::SDL2->havelib('SDL2', 'SDL2_image', 'SDL2_mixer');
+
+Parameter(s): One or more SDL2 related lib names - e.g. SDL2, SDL2_mixer, SDL2_image, ...
+
+Returns: 1 if all libs specified as a param are available; 0 otherwise.
+
 =head1 AUTHOR
 
     Kartik Thakore
@@ -272,6 +286,26 @@ MARKER
 
     return 0;
   }
+}
+
+sub havelib {
+  my ($package, @libs) = @_;  
+  my %headers = (
+        SDL2 => 'SDL_version.h',
+        SDL2_mixer => 'SDL_mixer.h',
+        SDL2_gfx => 'SDL2_gfxPrimitives.h',
+        SDL2_image => 'SDL_image.h',
+        SDL2_mixer => 'SDL_mixer.h',
+        SDL2_net => 'SDL_net.h',
+        SDL2_ttf => 'SDL_ttf.h',
+        smpeg => 'smpeg.h',
+  );
+  for my $l (@libs) {
+    next if $HAVELIB_CACHE{$l};
+    return 0 unless $headers{$l} && Alien::SDL2->check_header($headers{$l});
+    $HAVELIB_CACHE{$l} = 1;
+  }
+  return 1;
 }
 
 ### internal functions
