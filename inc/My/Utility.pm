@@ -35,22 +35,21 @@ $inc_lib_candidates->{$ENV{SDL2_INC}}           = $ENV{SDL2_LIB}              if
 # the order matters, we offer binaries to user in the same order (1st = preffered)
 my $prebuilt_binaries = [
     {
-      title    => "Binaries Win/32bit SDL2 (20130301) RECOMMENDED\n" .
+      title    => "Binaries Win/32bit SDL2 (20130305) RECOMMENDED\n" .
                   "\t(gfx, image, mixer, net, smpeg, ttf)",
       url      => [
-        'http://strawberryperl.com/package/kmx/sdl/32bit_SDL2_20130301.zip',
+        'http://strawberryperl.com/package/kmx/sdl/32bit_SDL2_20130305.zip',
       ],
-      sha1sum  => 'e00c36bccefb6ca679513e93bbbea1cc83b7e3e8',
+      sha1sum  => 'e77e5f04339d60871e9b79f66ac1bca4996648a7',
       match    => sub { $Config{archname} =~ /^MSWin32-x86-/ && $Config{cc} =~ /gcc/ },
     },
     {
-      title    => "Binaries Win/64bit SDL2 (20130301) RECOMMENDED\n" .
+      title    => "Binaries Win/64bit SDL2 (20130305) RECOMMENDED\n" .
                   "\t(gfx, image, mixer, net, smpeg, ttf)",
       url      => [
-        'http://strawberryperl.com/package/kmx/sdl/64bit_SDL2_20130301.zip',
-        'http://froggs.de/libsdl/Win32_SDL-1.2.14-extended-bin_20111205.zip',
+        'http://strawberryperl.com/package/kmx/sdl/64bit_SDL2_20130305.zip',
       ],
-      sha1sum  => 'd86c190812c452bc79be8d4f556507fd85e66bbe',
+      sha1sum  => 'f4d9b5e933029571ebbc1e323f504300da7988bc',
       match    => sub { $Config{archname} =~ /^MSWin32-x64-/ && $Config{cc} =~ /gcc/ },
     },
  ];
