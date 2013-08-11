@@ -6,7 +6,7 @@ use File::ShareDir qw(dist_dir);
 use File::Spec;
 use File::Find;
 use File::Spec::Functions qw(catdir catfile rel2abs);
-use File::Temp;
+use File::Temp qw(tempfile);
 use Capture::Tiny;
 use Config;
 
@@ -240,7 +240,7 @@ sub check_header {
   }
 
   my $cb = ExtUtils::CBuilder->new( quiet => 1, config => $config );
-  my ($fs, $src) = File::Temp->tempfile('XXXXaa', SUFFIX => '.c', UNLINK => 1);
+  my ($fs, $src) = tempfile('XXXXaa', SUFFIX => '.c', UNLINK => 1);
   my $inc = '';
   my $i = 0;
   foreach (@header) {
