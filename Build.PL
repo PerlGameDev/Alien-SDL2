@@ -58,7 +58,7 @@ my $build = $package->new(
   license              => 'perl',
   requires             => {
     'File::Spec'       => '0',
-    'File::Temp'       => '0',
+    'File::Temp'       => '0.23',
     'File::ShareDir'   => '0',
     'File::Which'      => '0',
     'ExtUtils::CBuilder' => '0',
@@ -67,7 +67,7 @@ my $build = $package->new(
   },
   build_requires       => {  #need to have for running: ./Build (install|test)
     'File::Spec'       => '0',
-    'File::Temp'       => '0',
+    'File::Temp'       => '0.23',
     'File::ShareDir'   => '0',
     'ExtUtils::CBuilder' => '0',
     'File::Path'       => '2.08',
