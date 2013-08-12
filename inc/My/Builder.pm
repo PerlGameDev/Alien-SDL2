@@ -107,7 +107,8 @@ sub ACTION_code {
       $self->set_ld_config($build_out);
     }
     elsif($bp->{buildtype} eq 'build_from_sources' ) {
-      my $m = $self->prompt("\nDo you want to see all messages during configure/make (y/n)?", 'n');
+     # my $m = $self->prompt("\nDo you want to see all messages during configure/make (y/n)?", 'n');
+      my $m = 1;
       $self->notes('build_msgs', lc($m) eq 'y' ? 1 : 0);
       # all the following functions die on error, no need to test ret values
       $self->fetch_sources($download);

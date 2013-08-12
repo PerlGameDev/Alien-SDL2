@@ -1,0 +1,31 @@
+language: perl
+perl:
+  - "5.10"
+  - "5.12"
+  - "5.14"
+  - "5.16"
+  - "5.18"
+
+before_install:
+# install tiff
+  - sudo apt-get install automake
+#  - wget ftp://ftp.remotesensing.org/pub/libtiff/tiff-4.0.3.tar.gz
+#  - tar xvfz tiff-4.0.3.tar.gz
+#  - cd tiff-4.0.3
+#  - ./autogen.sh
+#  - ./configure
+#  - sudo make install
+#  - cd ..
+
+# install deps
+  - cat ./cpan-deps | cpanm --sudo --notest -v
+  - cat ./cpan-deps
+  - dpkg -l
+
+install:
+  - perl ./Build.PL --default
+  - ./Build
+  - sudo ./Build install
+#  - ./Build install
+
+script: prove -v
