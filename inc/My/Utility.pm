@@ -29,6 +29,8 @@ $inc_lib_candidates->{'/usr/X11R7/include'}     = '/usr/X11R7/lib'            if
 $inc_lib_candidates->{'/usr/include/ogg'}       = '/usr/lib/x86_64-linux-gnu' if -f '/usr/lib/x86_64-linux-gnu/libogg.so';
 $inc_lib_candidates->{'/usr/include/vorbis'}    = '/usr/lib/x86_64-linux-gnu' if -f '/usr/lib/x86_64-linux-gnu/libvorbis.so';
 $inc_lib_candidates->{'/usr/include'}           = '/usr/lib64'                if -e '/usr/lib64' && $Config{'myarchname'} =~ /64/;
+$inc_lib_candidates->{'/usr/include'}           = ['/usr/lib64', '/usr/lib']  if -e '/usr/lib64' && -e '/usr/lib' && $Config{'myarchname'} =~ /64/;
+
 $inc_lib_candidates->{$ENV{SDL2_INC}}           = $ENV{SDL2_LIB}              if exists $ENV{SDL2_LIB} && exists $ENV{SDL2_INC};
 
 #### packs with prebuilt binaries
@@ -171,7 +173,7 @@ our $source_packs = [
         ],
         sha1sum  => '47c36240919fc5445a9f9f999ebba995dbf7f820',
         patches => [],
-        prereq_libs => ['ogg', 'vorbis', 'smpeg', 'SDL2'],
+        prereq_libs => ['SDL2', 'ogg', 'vorbis' ], #, 'smpeg'],
       },
       {
         pack => 'SDL2_ttf',
@@ -182,7 +184,7 @@ our $source_packs = [
         ],
         sha1sum  => 'a942fcce4d475e0336eb873bf281d885b41df495',
         patches => [],
-        prereq_libs => ['freetype', 'SDL2'],
+        prereq_libs => ['SDL2', 'freetype'],
       },
       {
         pack => 'SDL2_gfx',
@@ -238,6 +240,21 @@ sub check_config_script {
   };
 }
 
+sub find_dll_lib_inc {
+ my ($inc, $ld, $lib, $dlext, $header ) = @_;
+    my $found_dll          = '';
+    my $found_lib          = '';
+    my $found_inc          = '';
+     
+    ($found_dll) = find_file($ld, qr/[\/\\]lib\Q$lib\E[\-\d\.]*\.($dlext[\d\.]*|so|dll)$/);
+      $found_dll   = $1 if $found_dll && $found_dll =~/^(.+($dlext|so|dll))/ && -e $1;
+
+    ($found_inc) = find_file($inc,  qr/[\/\\]\Q$header\E[\-\d\.]*\.h$/);
+    ($found_lib) = find_file($ld, qr/[\/\\]lib\Q$lib\E[\-\d\.]*\.($dlext[\d\.]*|a|dll.a)$/);
+
+  return ( $found_dll, $found_lib, $found_inc );
+}
+
 sub check_prebuilt_binaries
 {
   print "checking for prebuilt binaries... ";
@@ -273,15 +290,22 @@ sub check_prereqs_libs {
       'SDL2'     => 'SDL_version',
     };
     my $header             = (defined $header_map->{$lib}) ? $header_map->{$lib} : $lib;
-
     my $dlext = get_dlext();
     foreach (keys %$inc_lib_candidates) {
-      my $ld = $inc_lib_candidates->{$_};
-      next unless -d $_ && -d $ld;
-      ($found_dll) = find_file($ld, qr/[\/\\]lib\Q$lib\E[\-\d\.]*\.($dlext[\d\.]*|so|dll)$/);
-      $found_dll   = $1 if $found_dll && $found_dll =~/^(.+($dlext|so|dll))/ && -e $1;
-      ($found_lib) = find_file($ld, qr/[\/\\]lib\Q$lib\E[\-\d\.]*\.($dlext[\d\.]*|a|dll.a)$/);
-      ($found_inc) = find_file($_,  qr/[\/\\]\Q$header\E[\-\d\.]*\.h$/);
+      my $inc = $_;
+      my $ld = $inc_lib_candidates->{$inc};
+      next unless -d $_ && (-d $ld || ref $ld eq 'ARRAY');
+	if( ref $ld eq 'ARRAY' ) {
+		   my $ld_size = scalar( @{ $ld } );
+		   foreach ( 0..$ld_size ) {
+			next unless (defined $ld->[$_] && -d $ld->[$_]);
+			  ($found_dll, $found_lib, $found_inc) = find_dll_lib_inc($inc, $ld->[$_], $lib, $dlext, $header );
+			last if $found_lib;
+		}
+	}
+	else {
+	  ($found_dll, $found_lib, $found_inc) = find_dll_lib_inc($inc, $ld, $lib, $dlext, $header,);
+	}
       last if $found_lib && $found_inc;
     }
 
@@ -293,6 +317,7 @@ sub check_prereqs_libs {
       print "no\n";
       $ret = 0;
     }
+  warn "###ERROR### Can't find $lib, will not compile libSDL2" if ($lib =~ 'pthread' && $ret == 0);
 
     if( scalar(@libs) == 1 ) {
       return $ret
@@ -387,7 +412,7 @@ sub check_header {
   my ($cflags, @header) = @_;
   print STDERR "Testing header(s): " . join(', ', @header) . "\n";
   my $cb = ExtUtils::CBuilder->new(quiet => 1);
-  my ($fs, $src) = File::Temp->tempfile('XXXXaa', SUFFIX => '.c', UNLINK => 1);
+  my ($fs, $src) = File::Temp::tempfile('XXXXaa', SUFFIX => '.c', UNLINK => 1);
   my $inc = '';
   $inc .= "#include <$_>\n" for @header;
   syswrite($fs, <<MARKER); # write test source code
