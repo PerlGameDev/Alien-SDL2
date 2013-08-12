@@ -16,11 +16,11 @@ Alien::SDL2 - building, finding and using SDL2 binaries
 
 =head1 VERSION
 
-Version 0.001
+Version 0.002
 
 =cut
 
-our $VERSION = '0.001';
+our $VERSION = '0.002';
 $VERSION = eval $VERSION;
 
 my %HAVELIB_CACHE;
