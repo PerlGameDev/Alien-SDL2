@@ -89,7 +89,7 @@ our $source_packs = [
           'ftp://ftp.remotesensing.org/pub/libtiff/tiff-4.0.3.tar.gz',
         ],
         sha1sum  => '652e97b78f1444237a82cbcfe014310e776eb6f0',
-        patches => [],
+        patches => ['libtiff.4.0.3.tiffio.h.patch'],
         prereq_libs => [],
       },
       {
