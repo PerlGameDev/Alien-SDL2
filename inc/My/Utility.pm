@@ -134,7 +134,7 @@ our $source_packs = [
         ],
         sha1sum  => 'a7a56c95dc47fd20ef3e51b84cebad4652683a80',
         patches => [],
-        prereq_libs => ['jpeg', 'tiff', 'png'],
+        prereq_libs => ['SDL2', 'jpeg', 'tiff', 'png'],
       },
       {
         pack => 'ogg',
@@ -171,7 +171,7 @@ our $source_packs = [
         ],
         sha1sum  => '47c36240919fc5445a9f9f999ebba995dbf7f820',
         patches => [],
-        prereq_libs => ['ogg', 'vorbis', 'smpeg'],
+        prereq_libs => ['ogg', 'vorbis', 'smpeg', 'SDL2'],
       },
       {
         pack => 'SDL2_ttf',
@@ -182,7 +182,7 @@ our $source_packs = [
         ],
         sha1sum  => 'a942fcce4d475e0336eb873bf281d885b41df495',
         patches => [],
-        prereq_libs => ['freetype'],
+        prereq_libs => ['freetype', 'SDL2'],
       },
       {
         pack => 'SDL2_gfx',
@@ -193,19 +193,20 @@ our $source_packs = [
         ],
         sha1sum  => '3ba18531d34f442ba9f4f6d84feb353dfb9c8130',
         patches => [],
-        prereq_libs => [],
+        prereq_libs => ['SDL2'],
       },
-      {
-        pack => 'smpeg',
-        version => '20130301-svn',
-        dirname => 'libsmpeg-svn20130301',
-        url => [
-          'http://strawberryperl.com/package/kmx/sdl/src/libsmpeg-svn20130301.tar.gz',
-        ],
-        sha1sum  => 'bba9f1f5313bf02bd4e5ee9f7b7d7459086647a1',
-        patches => [],
-        prereq_libs => ['SDL'],
-      },
+#
+#      {
+#        pack => 'smpeg',
+#        version => '20130301-svn',
+#        dirname => 'libsmpeg-svn20130301',
+#        url => [
+#          'http://strawberryperl.com/package/kmx/sdl/src/libsmpeg-svn20130301.tar.gz',
+#        ],
+#        sha1sum  => 'bba9f1f5313bf02bd4e5ee9f7b7d7459086647a1',
+#        patches => [],
+#        prereq_libs => [],
+#      },
     ],
   },
 ];
