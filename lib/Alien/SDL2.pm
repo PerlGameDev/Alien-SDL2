@@ -240,7 +240,7 @@ sub check_header {
   }
 
   my $cb = ExtUtils::CBuilder->new( quiet => 1, config => $config );
-  my ($fs, $src) = tempfile('XXXXaa', SUFFIX => '.c', UNLINK => 1);
+  my ($fs, $src) = tempfile('XXXX', SUFFIX => 'aa.c', UNLINK => 1);
   my $inc = '';
   my $i = 0;
   foreach (@header) {
