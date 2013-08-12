@@ -28,4 +28,10 @@ install:
   - sudo ./Build install
 #  - ./Build install
 
-script: prove -v
+script: 
+  - prove -v
+  - prove
+
+
+notifications:
+  irc: "irc.perl.org#sdl"
