@@ -8,32 +8,9 @@ perl:
 
 before_install:
 # install tiff
-#  - sudo apt-get install locate
   - sudo apt-get -y purge ruby libtiff4 libtiff4-dev libtiffxx0c2 zlib1g-dev
   - sudo apt-get autoremove
-
-#  - rm -rf ~/.gvm
-#  - rm -rf ~/.rvm
-#  - sudo updatedb
-#  - sudo locate zlib.so | xargs -I {} sudo rm -rf {}
-
-#  - sudo updatedb
-#  - sudo locate zlib > /tmp/aa
-
-
-#  - sudo locate libz > /tmp/a1
-#  - sudo cat /tmp/a1
-
-
   - sudo apt-get install automake
-
-#  - wget ftp://ftp.remotesensing.org/pub/libtiff/tiff-4.0.3.tar.gz
-#  - tar xvfz tiff-4.0.3.tar.gz
-#  - cd tiff-4.0.3
-#  - ./autogen.sh
-#  - ./configure
-#  - sudo make install
-#  - cd ..
 
 # install deps
   - cat ./cpan-deps | cpanm --sudo --notest -v
@@ -44,12 +21,9 @@ install:
   - perl ./Build.PL --travis
   - ./Build
   - sudo ./Build install
-#  - ./Build install
 
 script:
-  - prove -v
   - prove
-
 
 notifications:
   irc: "irc.perl.org#sdl"
