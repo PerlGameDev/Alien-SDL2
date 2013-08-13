@@ -68,7 +68,7 @@ our $source_packs = [
         url => [
           'http://www.zlib.net/zlib-1.2.8.tar.gz'
         ],
-        sha1sum  => '69d42045d87a5e7bff93ae28facb8f448b99b539',
+        sha1sum  => 'a4d316c404ff54ca545ea71a27af7dbc29817088',
         patches => [],
         prereq_libs => [],
       },
