@@ -13,6 +13,7 @@ File::ShareDir
 File::Spec
 File::Spec::Functions
 File::Which
+File::Temp
 Getopt::Long
 Module::Build
 Test::More

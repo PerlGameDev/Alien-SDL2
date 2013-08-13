@@ -40,7 +40,6 @@ sub ACTION_build {
   $self->SUPER::ACTION_build;
 }
 
-
 sub ACTION_install
 {
  my $self = shift;
@@ -106,9 +105,20 @@ sub ACTION_code {
       $self->set_config_data($build_out);
       $self->set_ld_config($build_out);
     }
-    elsif($bp->{buildtype} eq 'build_from_sources' ) {
-     # my $m = $self->prompt("\nDo you want to see all messages during configure/make (y/n)?", 'n');
-      my $m = 1;
+    elsif ( $bp->{buildtype} eq 'build_from_sources' ) {
+
+        my $m = '';
+        if ( $self->notes('travis') == 1 ) {
+            # always select option '1'
+            $m = 1;
+        }
+        else {
+            $m = $self->prompt(
+"\nDo you want to see all messages during configure/make (y/n)?",
+                'n'
+            );
+        }
+
       $self->notes('build_msgs', lc($m) eq 'y' ? 1 : 0);
       # all the following functions die on error, no need to test ret values
       $self->fetch_sources($download);

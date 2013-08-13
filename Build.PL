@@ -6,12 +6,9 @@ use File::Spec::Functions qw(catdir catfile);
 use Config;
 use My::Utility qw(check_config_script check_prebuilt_binaries check_prereqs_libs check_prereqs_tools $source_packs);
 
-
-
 use Getopt::Long;
-my $ans   = '';
-GetOptions (  "default"  => \$ans)  ;
-
+my ($ans, $travis)   = '';
+GetOptions (  "travis"  => \$travis)  ;
 
 print "Welcome to Alien::SDL2 module installation\n";
 print "------------------------------------------\n";
@@ -193,11 +190,22 @@ else {
 
     $prompt_string .= "[" . $i++ . "] " . $c->{title} . "\n";
   }
-  $prompt_string .= "\nWhat way do you wanna go?";
-  $ans = $build->prompt($prompt_string, $recommended_candidate) unless $ans;
+
+  # select option '1' for travis
+  if ($travis == 1) {
+      $ans = 1;
+      #set 'travis' var for inc/My/Builder.pm
+      $build->notes( 'travis', '1' );
+  }
+
+  # or prompt user for build option
+  else {
+      $prompt_string .= "\nWhat way do you wanna go?";
+      $ans = $build->prompt( $prompt_string, $recommended_candidate );
+  }
 
   if($ans > 0 && $ans < scalar(@candidates)) {
-    $choice = $candidates[$ans - 1];
+      $choice = $candidates[$ans - 1];
   }
 
   $| = 0;
