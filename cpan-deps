@@ -18,3 +18,4 @@ Getopt::Long
 Module::Build
 Test::More
 Text::Patch
+Data::Printer
