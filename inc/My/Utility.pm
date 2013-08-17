@@ -102,7 +102,7 @@ our $source_packs = [
           'http://downloads.sourceforge.net/libpng/libpng-1.6.3.tar.gz',
         ],
         sha1sum  => 'b8b7b911909c09d71324536aaa7750104d170c77',
-        patches => [],
+        patches => ['libpng-1.6.3-hack.patch'],
         prereq_libs => ['z'],
       },
       {
