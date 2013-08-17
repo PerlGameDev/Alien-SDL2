@@ -91,7 +91,7 @@ our $source_packs = [
           'ftp://ftp.remotesensing.org/pub/libtiff/tiff-4.0.3.tar.gz',
         ],
         sha1sum  => '652e97b78f1444237a82cbcfe014310e776eb6f0',
-        patches => [],
+        patches => ['libtiff.4.0.3.tiffio.h.patch'],
         prereq_libs => [],
       },
       {
@@ -114,7 +114,7 @@ our $source_packs = [
         ],
         sha1sum  => '2d539b375688466a8e7dcc4260ab21003faab08c',
         patches => [],
-        prereq_libs => [],
+        prereq_libs => ['SDL2', 'freetype'],
       },
       {
         pack => 'SDL2',
@@ -138,7 +138,7 @@ our $source_packs = [
         ],
         sha1sum  => '20b1b0db9dd540d6d5e40c7da8a39c6a81248865',
         patches => [],
-        prereq_libs => ['jpeg', 'tiff', 'png'],
+        prereq_libs => ['SDL2', 'jpeg', 'tiff', 'png'],
       },
       {
         pack => 'ogg',
@@ -177,7 +177,7 @@ our $source_packs = [
         ],
         sha1sum  => '9ed975587f09a1776ba9776dcc74a58e695aba6e',
         patches => [],
-        prereq_libs => ['ogg', 'vorbis', 'smpeg'],
+        prereq_libs => ['SDL2', 'ogg', 'vorbis', 'smpeg'],
       },
       {
         pack => 'SDL2_ttf',
@@ -200,7 +200,7 @@ our $source_packs = [
         ],
         sha1sum  => '3ba18531d34f442ba9f4f6d84feb353dfb9c8130',
         patches => [],
-        prereq_libs => [],
+        prereq_libs => ['SDL2'], 
       },
       {
         pack => 'smpeg',
