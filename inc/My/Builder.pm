@@ -425,10 +425,15 @@ sub apply_patch {
     $k = catfile($dir_to_be_patched, $k);
     print STDERR "- gonna patch '$k'\n";
 
-    open(SRC, "<", $k) or die "###ERROR### Cannot open file: '$k'\n";
-    $src  = <SRC>;
-    close(SRC);
-    $src =~ s/\r\n/\n/g; #normalise newlines
+    if (-f $k) {
+      open(SRC, "<", $k) or die "###ERROR### Cannot open file: '$k'\n";
+      $src  = <SRC>;
+      close(SRC);
+      $src =~ s/\r\n/\n/g; #normalise newlines
+    }
+    else {
+      $src = "";
+    }
 
     my $out = eval { Text::Patch::patch( $src, $p, { STYLE => "Unified" } ) };
     if ($out) {
