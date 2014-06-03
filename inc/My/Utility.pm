@@ -467,7 +467,7 @@ sub get_dlext {
     return 'la';
   }
   else {
-    return $Config{dlext};
+    return $Config{so};
   }
 }
 
