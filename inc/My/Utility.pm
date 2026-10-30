@@ -220,14 +220,33 @@ our $source_packs = [
 sub check_config_script {
   my $script = shift || 'sdl2-config';
   print "checking for config script... ";
-  my $devnull = File::Spec->devnull();
-  my $version = `$script --version 2>$devnull`;
-  if($? >> 8) {
+  # Store the resolved path so a later PATH change cannot select our wrapper.
+  $script = File::Which::which($script);
+  unless ($script && -f $script) {
     print "no\n";
     return;
   }
-  my $prefix = `$script --prefix 2>$devnull`;
-  if($? >> 8) {
+  $script = rel2abs($script);
+  if (open my $fh, '<', $script) {
+    my $source = '';
+    read $fh, $source, 65536;
+    close $fh;
+    if ($source =~ /\buse\s+Alien::SDL2?\s*;/
+        && $source =~ /Alien::SDL2?\s*->\s*config\s*\(/) {
+      print "no (Alien config wrapper would recurse)\n";
+      return;
+    }
+  }
+  # Also stop recursion through indirect wrappers using Alien::SDL2.
+  local $ENV{ALIEN_SDL2_CONFIG_RUNNING} = 1;
+  my $devnull = File::Spec->devnull();
+  my $version = `"$script" --version 2>$devnull`;
+  if($? != 0 || $version !~ /^\d+(?:\.\d+)+[\r\n]*$/) {
+    print "no\n";
+    return;
+  }
+  my $prefix = `"$script" --prefix 2>$devnull`;
+  if($? != 0 || $prefix !~ /\S/) {
     print "no\n";
     return;
   }
