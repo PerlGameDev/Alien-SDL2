@@ -1,5 +1,10 @@
 Revision history for Perl module Alien::SDL2
 
+Unreleased
+    - Reject Alien config wrappers during SDL2 config script detection and
+      save absolute script paths. Stop recursive runtime config invocations
+      and report failed config scripts instead of returning empty output.
+
 0.002 17/08/2013 
     - Added patch for compiling libtiff 4.0.3 with jpeg-9 on Debian/Ubuntu machines
     - Added travis integration for continous testing [mtj++]

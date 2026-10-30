@@ -43,6 +43,10 @@ or using default script name 'sdl2-config' by running:
 B<IMPORTANT NOTE:> Using --with-sdl2-config avoids considering any other
 build methods; no prompt with other available build options.
 
+The script must be an independent SDL2 configuration program, not a Perl
+wrapper that calls C<Alien::SDL2-E<gt>config>. The detected absolute path is
+stored to avoid selecting a different program after a C<PATH> change.
+
 =item * Locate an already installed SDL2 via 'sdl2-config' script.
 
 =item * Download prebuilt SDL2 binaries (if available for your platform).
@@ -316,7 +320,12 @@ sub _sdl2_config_via_script
   my $devnull = File::Spec->devnull();
   my $script = Alien::SDL2::ConfigData->config('script');
   return unless ($script && ($param =~ /[a-z0-9_]*/i));
-  my $val = `$script --$param 2>$devnull`;
+  die "Recursive SDL2 config script invocation: $script. Reconfigure Alien::SDL2 with an independent SDL2 config script.\n"
+    if $ENV{ALIEN_SDL2_CONFIG_RUNNING};
+  local $ENV{ALIEN_SDL2_CONFIG_RUNNING} = 1;
+  my $val = `"$script" --$param 2>$devnull`;
+  die "SDL2 config script failed: $script --$param (status $?). Check the Alien::SDL2 configuration.\n"
+    if $? != 0;
   $val =~ s/[\r\n]*$//;
   if($param eq 'cflags') {
     $val .= ' ' . Alien::SDL2::ConfigData->config('additional_cflags');
